@@ -6,9 +6,9 @@ It will be updated throughout the course to include four labworks.
 
 ## Labwork Overview
 
-| Labwork | Topic | Status |
-|---------|-------|--------|
-| Lab 1 | Data Exploration, Preprocessing, and PCA | In progress |
+| Labwork | Topic | Status | Report Link |
+|---------|-------|--------|--------|
+| Lab 1 | Data Exploration, Preprocessing, and PCA | In progress | [Report](https://www.overleaf.com/project/6afa63d29184bd0d41a89e89/share#91c089aba0ec1ecdf178192f5c479080f8930d4f0e53d592)
 | Lab 2 | To be announced | Not started |
 | Lab 3 | To be announced | Not started |
 | Lab 4 | To be announced | Not started |
