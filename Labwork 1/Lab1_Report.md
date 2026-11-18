@@ -23,7 +23,6 @@
 
 
 ### 1.2. Data Cleaning
-*Identify missing values, duplicate records, incorrect values, inconsistencies, outliers*
 
 By applying different data cleaning operations, here is the result of this process:
 
@@ -66,3 +65,30 @@ The outliers are not necessarily incorrect values. In outlier handling, the IQR 
 From the above result, the `product_weight_g` has the highest proportion of flagged outliers (13.81%), meaning that the weight of the product is significantly variable and has many values outside the IQR range. In contrast, the `product_name_lenght` accounts for the lowest outliers percentage (0.9%), indicating that the number of extreme values according to IQR rules is relatively small. In general, numerical features may vary across product categories, so it should not automatically be considered that outliers are erroneous values.
 
 ### 1.3. Data Integration and Transformation
+**Data Integration**
+
+The original Olist Products dataset contains `product_category_name` in Portuguese, which made the category names difficult to understand. However, the dataset includes another file `product_category_name_translation.csv`. It contains the corresponding English category names to improve the readability and interpretability. Both files are matched using `product_category_name` feature, so it is the matching key. Therefore, the `product_category_name_english` feature in this dataset was merged into the current `olist_products_dataset.csv` to allow easier category-based analysis and visualization.
+
+The left merge method was performed using `product_category_name` as the matching key to preserve all the records in the Olist Products dataset. The merged result is displayed as the table below:
+
+| | Result |
+|---|---|
+| Rows before integration | 32336 |
+| Rows after integration | 32336 |
+| Duplicate category keys | 0 |
+| Products without English translation | 13 |
+| Missing display labels | 0 |
+
+The result showed that the number of records remained unchanged, indicating that the integration process did not lose or duplicate records. However, after the left merge, there were 13 products without English translation: 10 products belonging to the category `portateis_cozinha_e_preparadores_de_alimentos` and the other 3 belonging to the `pc_gamer` category. To preserve the records and avoid missing display labels, it was decided to apply the fallback-to-original-category method, which means that the dataset used the original Portuguese category name for these products instead of removing them. This ensures that every product has a category label for subsequent analysis and visualization.
+
+The following table presents five examples of category mappings after integration.
+
+| `product_category_name` | `product_category_name_english` |
+|---|---|
+| beleza_saude | health_beauty |
+| informatica_acessorios | computers_accessories |
+| automotivo | auto |
+| cama_mesa_banho | bed_bath|table |
+| moveis_decoracao | furniture_decor |
+
+**Data Transformation**
