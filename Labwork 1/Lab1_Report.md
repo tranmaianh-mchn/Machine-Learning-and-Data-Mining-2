@@ -23,24 +23,24 @@
 
 
 ### 1.2. Data Cleaning
-
+#### 1.2.1. Missing values, duplicate records, inconsistencies
 By applying different data cleaning operations, here is the result of this process:
 
 | | Before | After |
 |---|---|---|
-| **Total records** | 32951 | 32336 |
-| **Missing numerical value records** | 611 | 0 |
-| **Zero weight value records** | 4 | 0 |
-| **Duplicate records** | 0 | 0 |
-| **Records with detected inconsistencies** | 0 | 0 |
+| Total records | 32951 | 32336 |
+| Missing numerical value records | 611 | 0 |
+| Zero weight value records | 4 | 0 |
+| Duplicate records | 0 | 0 |
+| Records with detected inconsistencies | 0 | 0 |
+| **Total number of removed records** | **615** |
 
-- A total of 615 records (1.87% of the original dataset) were removed, including 611 records with at least one missing numerical value anf 4 records with zero product weight. The record removal instead of adding missing values generally can preserve the data integrity, avoid artificial values that could affect variance and correlation, maintain the statistical reliability. Moreover, the removed instances is not too much and the remaining data is still enough for the data analysis and data visualization.
+Four zero-weight values were denoted as missing, so a total of 615 rows were removed, accounting for 1.87% of the original dataset. After the data cleaning process, there were 32336 products left with complete numerical features.
 
-- As usual, the duplicate records can repeat the observations, leading to the problem of data distribution. In this dataset, it is detected that there is no duplicate records, so the duplicate removal was unnecessary.
+Removing the missing records can help improve PCA input quality. However, if the missing data are not random, this may introduce bias.
 
-- No inconsistencies were detected during the consistency checks; therefore, no additional corrections were required. 
-
-- Outlier detection: IQR method is applied in this stage. It is a non-parametric, distribution-agnostic technique used to identify anomalies or extreme values in a dataset. The IQR method is expressed as:  
+#### 1.2.2. Outlier detection
+IQR method is applied in this stage. It is a non-parametric, distribution-agnostic technique used to identify anomalies or extreme values in a dataset. The IQR method is expressed as:  
                             $$IQR = Q_3 - Q_1$$
 where $Q_1$ (The first quartile) is denoted as the median of the lower half of the data and $Q_3$ (The third quartile) is the median of the upper half of the data. The data point (denoted as $x$) is flagged as an outlier is displayed as:
 $$
@@ -50,7 +50,7 @@ x > Q_3 + 1.5IQR
 $$
 The outliers are not necessarily incorrect values. In outlier handling, the IQR method can detect statistically abnormal values instead of determine whether extreme values are wrong. Retaining outliers can preserve the natural variability because removing all the outliers may lead to the loss of valid extreme observations. Furthermore, keeping the outliers can avoid unnecessary information loss as extreme observations may be useful for the dataset. In contrast, IQR also has some limitations. The outliers may increase the variance, affecting the covariance and correlation and also the directions of principal components in PCA later on. The result of applying IQR in this dataset
 
-- IQR outlier detection in Olis Product dataset is applied for all 7 numerical features. Here is the result table:
+IQR outlier detection in Olis Product dataset is applied for all 7 numerical features. Here is the result table:
 
 | Feature | Flagged outliers | Percentage (%) |
 |---|---|---|
@@ -79,9 +79,9 @@ The left merge method was performed using `product_category_name` as the matchin
 | Products without English translation | 13 |
 | Missing display labels | 0 |
 
-The result showed that the number of records remained unchanged, indicating that the integration process did not lose or duplicate records. However, after the left merge, there were 13 products without English translation: 10 products belonging to the category `portateis_cozinha_e_preparadores_de_alimentos` and the other 3 belonging to the `pc_gamer` category. To preserve the records and avoid missing display labels, it was decided to apply the fallback-to-original-category method, which means that the dataset used the original Portuguese category name for these products instead of removing them. This ensures that every product has a category label for subsequent analysis and visualization.
+The result showed that the number of records remained unchanged, indicating that the integration process did not lose or duplicate records. However, after the left merge, there were 13 products without English translation. To preserve the records and avoid missing display labels, it was decided to apply the fallback-to-original-category method, which means that the dataset used the original Portuguese category name for these products instead of removing them. This ensures that every product has a category label for subsequent analysis and visualization.
 
-The following table presents five examples of category mappings after integration.
+The following table presents five examples of category mappings after integration, including the category without the English translation:.
 
 | `product_category_name` | `product_category_name_english` |
 |---|---|
@@ -89,7 +89,7 @@ The following table presents five examples of category mappings after integratio
 | informatica_acessorios | computers_accessories |
 | automotivo | auto |
 | cama_mesa_banho | bed_bath|table |
-| moveis_decoracao | furniture_decor |
+| pc_gamer | pc_gamer |
 
 #### 1.3.2. Data Transformation
 
@@ -142,3 +142,61 @@ The Olist Products dataset contains 73 categories, so Frequency count and its pr
 ![Correlation matrix of 7 numerical features in the cleaned Olist Products dataset](heatmap-1.png)
 
 By Pearson correlation calculation methods among 7 numerical features in the cleaned Olist Products dataset, we have found that the strongest correlation pair is Weight - Height with $r = 0.5626$, indicating a moderate positive linear relationship, suggesting that taller products tend to be heavier. In addition, there are also other moderate positive relationship, such as Length - Width ($r = 0.5417$), Weight - Width ($r = 0.5268$), and Weight - Length ($r = 0.4762$). In contrast, features like name length, description length and photos show weak linear relationships with physical features. When applying in PCA later, correlated physical features share some information that PCA may capture their common variation in fewer components.
+
+### 1.5. Principal Component Analysis (PCA)
+#### 1.5.1. Preprocessing data
+- PCA input shape: (32336, 7)
+- Missing values: 0 (data was cleaned in the Study process)
+- Covariance matrix shape is (7, 7) and is computed from the standardized data to examine how the numercal features vary together.
+
+#### 1.5.2. Explained variance of each PC
+Eigenvectors define the principal component (PC) directions, while eigenvalues represent the variance along these directions. The PCs are sorted by eigenvalues in the descending order. The eigenvalue results, the corresponding explained variance (measured in %) and the cumulative variance were computed as following:
+
+| Component | Eigenvalue | Explained variance (%) | Cumulative variance (%) |
+|---|---|---|---|
+| PC1 | 2.3434 | 33.4761 | 33.4761 |
+| PC2 | 1.2201 | 17.4288 | 50.9049 |
+| PC3 | 0.9786 | 13.9797 | 64.8846 |
+| PC4 | 0.8658 | 12.3678 | 77.2523 |
+| PC5 | 0.7997 | 11.4244 | 88.6767 |
+| PC6 | 0.4408 | 6.2972 | 94.9739 |
+| PC7 | 0.3518 | 5.0261 | 100.00 |
+
+The result shows that PC1 has the highest explained variance ($33.48\%$), while PC7 is the lowest ($5.03\%$). The objective of PCA is to reduce the dimensions while preserving as much variance as possible. Here, PCs with high explained variance tend to be selected when aiming to lower the dimensionality. Therefore, principal components with higher explained variance are generally prioritized for dimensionality reduction, while those with lower explained variance may be discarded with relatively less information loss.
+
+#### 1.5.3. The number of selected PCs
+Since the number of selected PCs increases, corresponding to an increase in retained variance, the number of dimensions removed decreases. As the following table clarifies:
+
+| Number of PCs selected | Retained variance (%) | Discard variance (%) | Dimensions removed |
+|---|---|---|---|
+| 1 | 33.48 | 66.52 | 6 |
+| 2 | 50.90 | 49.10 | 5 |
+| 3 | 64.88 | 35.12 | 4 |
+| 4 | 77.25 | 22.75 | 3 |
+| 5 | 88.68 | 11.32 | 2 |
+| 6 | 94.97 | 5.03 | 1 |
+| 7 | 100.00 | 0.00 | 0 |
+
+#### 1.5.4. Data distribution visualization in 2D using PC1 and PC2
+
+![Olist Products: PC1 - PC2 by Category (Top 5 Categories)](pca-1.png)
+
+The diagram illustrates the category distribution in 2D using PC1 and PC2, as described in Part 1.1 that `product_category_name` is defined as the label. However, the dataset contains 73 categories, so we decided to select only 5 most frequent product categories to visualize. 
+
+As observed, most observations are concentrated in a high-density region near the center-right of the plot. The categories overlap considerably, so they are not clearly separated. Another limitation is PC1 and PC2 together explain only 50.9% of the total variance; therefore, the remaining 49.1% of variance is not represented in the 2D projection.
+
+#### 1.5.5. Original - PCA representation and PCA's pros and cons
+ 
+| | Original numerical data | PCA representation |
+|---|---|---|
+| Overall | Each product is described by 7 numerical features | Each product is described by ${k}$ principal component scores <br> Each PC is a linear combination of the 7 standardized features |
+| Dimensions | 7  | ${k}$, with ${k}$ = 2 used for visualization |
+| No. products | 32336 | 32336 (unchanged) |
+
+**PCA pros and cons based on information preservation, interpretability, visualization**
+
+| Aspect | Advantages | Limitations |
+|---|---|---|
+| **Information preservation** | PCA selects directions that retain the greatest variance for a given number of components. In this dataset, 5 PCs retain 88.68% of the total variance, while 6 PCs retain 94.97%. | Reducing dimensionality discards some variance. The first two PCs retain only 50.90%, leaving 49.10% unrepresented in the 2D projection. |
+| **Interpretability** | Examining the component coefficients helps identify which original features contribute most to each PC. For example, PC1 mainly reflects variation in product weight and physical dimensions. | PCs combine multiple standardized features, making them less directly interpretable than original measurements such as weight in grams or height in centimetres. |
+| **Visualization** | Projecting onto PC1 and PC2 allows the seven-dimensional data to be explored in a 2D scatter plot, showing concentrations, overlaps, and isolated points. | The plot captures only part of the total variance. The five displayed product categories overlap considerably, so they are not clearly separated in this projection. |
